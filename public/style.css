@@ -59,8 +59,27 @@ video {
   -moz-transform: rotateY(180deg);
 }
 
+/* Add this CSS to your style.css file */
+#send {
+  padding: 8px 16px;
+  margin-left: 8px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 17px;
+  height: 7vh;
+  cursor: pointer;
+}
+
+#send:hover {
+  background-color: #0056b3;
+  cursor: pointer;
+}
+
 .options {
   padding: 1rem;
+  cursor: pointer;
   display: flex;
   background-color: var(--main-darklg);
 }
@@ -84,6 +103,11 @@ video {
   font-size: 1.2rem;
   width: 50px;
   margin: 0 0.5rem;
+  transition: 200ms;
+}
+
+.options__button:hover {
+  background: #161d29;
 }
 
 .background__red {

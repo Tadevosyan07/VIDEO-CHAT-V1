@@ -1,20 +1,23 @@
 import express from 'express';
 import { createServer } from 'http';
 import Server from 'socket.io';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import { ExpressPeerServer } from 'peer';
 
 const app = express();
-const server = createServer(app);
+export const server = createServer(app);
 const io = new Server(server);
-
-// Create and use the PeerJS server
 const peerServer = ExpressPeerServer(server, {
-  debug: true,
+  debug: true
 });
-app.use('/peerjs', peerServer);
 
-app.set('view engine', 'ejs');
+// Get the directory name of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use('/peerjs', peerServer);
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
@@ -22,7 +25,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/:room', (req, res) => {
-  res.render('room', { roomId: req.params.room });
+  res.render(path.join(__dirname, 'views', 'room.ejs'), { roomId: req.params.room });
 });
 
 io.on('connection', (socket) => {
@@ -34,12 +37,17 @@ io.on('connection', (socket) => {
       io.to(roomId).emit('createMessage', message, userName);
     });
 
-    socket.on('screen-share', (data) => {
-      socket.to(roomId).emit('user-screen-share', data);
+    socket.on('screen-share', ({ streamId, roomId }) => {
+      socket.to(roomId).emit('user-screen-sharing', streamId);
     });
 
-    socket.on('pointer-control', (data) => {
-      socket.to(roomId).emit('pointer-control', data);
+    socket.on('pointer-control', (pointerData) => {
+      socket.to(pointerData.roomId).emit('pointer-control', pointerData);
+    });
+
+    socket.on('end-call', () => {
+      socket.to(roomId).emit('user-disconnected', userId);
+      socket.leave(roomId);
     });
 
     socket.on('disconnect', () => {
